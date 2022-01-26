@@ -36,11 +36,11 @@ def create_database():
     id_date_input INTEGER);
     CREATE TABLE age(
     id_age_table INTEGER PRIMARY KEY AUTOINCREMENT,
-    age TEXT,
+    age_upon_outcome TEXT,
     FOREIGN KEY (id_age_table) REFERENCES animals_new (id_age));
     CREATE TABLE type(
     id_type_table INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT,
+    animal_type TEXT,
     FOREIGN KEY (id_type_table) REFERENCES animals_new (id_type));
     CREATE TABLE name(
     id_name_table INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,91 +58,19 @@ def create_database():
     FOREIGN KEY (id_date_of_birth_table) REFERENCES animals_new (id_date_of_birth));
     CREATE TABLE program(
     id_program_table INTEGER PRIMARY KEY AUTOINCREMENT,
-    program TEXT DEFAULT 'NoProgram',
+    outcome_subtype TEXT DEFAULT 'NoProgram',
     FOREIGN KEY (id_program_table) REFERENCES animals_new (id_program));
     CREATE TABLE what_now(
     id_what_now_table INTEGER PRIMARY KEY AUTOINCREMENT,
-    what_now TEXT DEFAULT 'Unknown',
+    outcome_type TEXT DEFAULT 'Unknown',
     FOREIGN KEY (id_what_now_table) REFERENCES animals_new (id_what_now));
     CREATE TABLE date_input(
     id_date_input_table INTEGER PRIMARY KEY AUTOINCREMENT,
-    date_input_month TEXT,
-    date_input_year TEXT,
+    outcome_month TEXT,
+    outcome_year TEXT,
     FOREIGN KEY (id_date_input_table) REFERENCES animals_new (id_date_input));
     """
     database_params(query, 'animals_new', 0)
-
-
-def insert_age():
-    query = """SELECT DISTINCT age_upon_outcome FROM animals ORDER BY age_upon_outcome"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO age (age)
-    values (?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_type():
-    query = """SELECT DISTINCT animal_type FROM animals ORDER BY animal_type"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO type (type)
-    values (?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_name():
-    query = """SELECT DISTINCT name FROM animals ORDER BY name"""
-    list_sql = database_no_params(query)
-    query = '''
-    INSERT INTO name (name)
-    values (?)'''
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_appearance():
-    query = """SELECT DISTINCT breed, color1, color2 FROM animals ORDER BY name"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO appearance (breed, color1, color2)
-    values (?,?,?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_date_of_birth():
-    query = """SELECT DISTINCT date_of_birth FROM animals ORDER BY date_of_birth"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO date_of_birth (date_of_birth)
-    values (?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_program():
-    query = """SELECT DISTINCT outcome_subtype FROM animals ORDER BY outcome_subtype"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO program (program)
-    values (?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_what_now():
-    query = """SELECT DISTINCT outcome_type FROM animals ORDER BY outcome_type"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO what_now (what_now)
-    values (?)"""
-    database_params(query, 'animals_new', list_sql)
-
-
-def insert_date_input():
-    query = """SELECT DISTINCT outcome_month,outcome_year FROM animals ORDER BY outcome_year"""
-    list_sql = database_no_params(query)
-    query = """
-    INSERT INTO date_input (date_input_month, date_input_year)
-    values (?,?)"""
-    database_params(query, 'animals_new', list_sql)
 
 
 def drop_database():
@@ -160,17 +88,28 @@ def drop_database():
     database_params(query, 'animals_new', 0)
 
 
-def my_prog():
-    create_database()
-    insert_age()
-    insert_type()
-    insert_name()
-    insert_appearance()
-    insert_date_of_birth()
-    insert_program()
-    insert_what_now()
-    insert_date_input()
+def super_func():
+    dict_column_and_dict = {'age': ['age_upon_outcome'],
+                            'type': ['animal_type'],
+                            'name': ['name'],
+                            'appearance': ['breed', 'color1', 'color2'],
+                            'date_of_birth': ['date_of_birth'],
+                            'program': ['outcome_subtype'],
+                            'what_now': ['outcome_type'],
+                            'date_input': ['outcome_year', 'outcome_month']}
+    super_insert_database_func(dict_column_and_dict)
 
 
-# my_prog()
-# drop_database()
+def super_insert_database_func(dict_create_query):
+    for key, value in dict_create_query.items():
+        query = f"""SELECT DISTINCT {','.join(value)} FROM animals ORDER BY {','.join(value)}"""
+        list_sql = database_no_params(query)
+        query = f"""
+        INSERT INTO {key} ({','.join(value)})
+        values ({','.join(['?']*len(value))})"""
+        database_params(query, 'animals_new', list_sql)
+
+
+create_database()
+#drop_database()
+super_func()

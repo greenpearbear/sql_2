@@ -24,7 +24,7 @@ def database_params(sqlite_query, name_table, params):
 
 def create_database():
     query = """
-    CREATE TABLE animals_new(
+    CREATE TABLE IF NOT EXISTS animals_new(
     id_animals INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     id_age INTEGER,
     id_type INTEGER,
@@ -34,37 +34,37 @@ def create_database():
     id_program INTEGER,
     id_what_now INTEGER,
     id_date_input INTEGER);
-    CREATE TABLE age(
+    CREATE TABLE IF NOT EXISTS age(
     id_age_table INTEGER PRIMARY KEY AUTOINCREMENT,
     age_upon_outcome TEXT,
     FOREIGN KEY (id_age_table) REFERENCES animals_new (id_age));
-    CREATE TABLE type(
+    CREATE TABLE IF NOT EXISTS type(
     id_type_table INTEGER PRIMARY KEY AUTOINCREMENT,
     animal_type TEXT,
     FOREIGN KEY (id_type_table) REFERENCES animals_new (id_type));
-    CREATE TABLE name(
+    CREATE TABLE IF NOT EXISTS name(
     id_name_table INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT DEFAULT 'NoName',
     FOREIGN KEY (id_name_table) REFERENCES animals_new (id_name));
-    CREATE TABLE appearance(
+    CREATE TABLE IF NOT EXISTS appearance(
     id_appearance_table INTEGER PRIMARY KEY AUTOINCREMENT,
     breed TEXT,
     color1 TEXT,
     color2 TEXT,
     FOREIGN KEY (id_appearance_table) REFERENCES animals_new (id_appearance));
-    CREATE TABLE date_of_birth(
+    CREATE TABLE IF NOT EXISTS date_of_birth(
     id_date_of_birth_table INTEGER PRIMARY KEY AUTOINCREMENT,
     date_of_birth TEXT,
     FOREIGN KEY (id_date_of_birth_table) REFERENCES animals_new (id_date_of_birth));
-    CREATE TABLE program(
+    CREATE TABLE IF NOT EXISTS program(
     id_program_table INTEGER PRIMARY KEY AUTOINCREMENT,
     outcome_subtype TEXT DEFAULT 'NoProgram',
     FOREIGN KEY (id_program_table) REFERENCES animals_new (id_program));
-    CREATE TABLE what_now(
+    CREATE TABLE IF NOT EXISTS what_now(
     id_what_now_table INTEGER PRIMARY KEY AUTOINCREMENT,
     outcome_type TEXT DEFAULT 'Unknown',
     FOREIGN KEY (id_what_now_table) REFERENCES animals_new (id_what_now));
-    CREATE TABLE date_input(
+    CREATE TABLE IF NOT EXISTS date_input(
     id_date_input_table INTEGER PRIMARY KEY AUTOINCREMENT,
     outcome_month TEXT,
     outcome_year TEXT,
@@ -88,19 +88,17 @@ def drop_database():
     database_params(query, 'animals_new', 0)
 
 
-def super_func():
-    dict_column_and_dict = {'age': ['age_upon_outcome'],
-                            'type': ['animal_type'],
-                            'name': ['name'],
-                            'appearance': ['breed', 'color1', 'color2'],
-                            'date_of_birth': ['date_of_birth'],
-                            'program': ['outcome_subtype'],
-                            'what_now': ['outcome_type'],
-                            'date_input': ['outcome_year', 'outcome_month']}
-    super_insert_database_func(dict_column_and_dict)
-
-
-def super_insert_database_func(dict_create_query):
+def super_insert_database_func():
+    dict_create_query = {
+        'age': ['age_upon_outcome'],
+        'type': ['animal_type'],
+        'name': ['name'],
+        'appearance': ['breed', 'color1', 'color2'],
+        'date_of_birth': ['date_of_birth'],
+        'program': ['outcome_subtype'],
+        'what_now': ['outcome_type'],
+        'date_input': ['outcome_year', 'outcome_month']
+    }
     for key, value in dict_create_query.items():
         query = f"""SELECT DISTINCT {','.join(value)} FROM animals ORDER BY {','.join(value)}"""
         list_sql = database_no_params(query)
@@ -110,6 +108,13 @@ def super_insert_database_func(dict_create_query):
         database_params(query, 'animals_new', list_sql)
 
 
-create_database()
-#drop_database()
-super_func()
+def insert_animals_new():
+    query = """SELECT * FROM animals LIMIT 1"""
+    list_sql = database_no_params(query)
+    print(list_sql)
+
+
+#create_database()
+# drop_database()
+#super_insert_database_func()
+insert_animals_new()

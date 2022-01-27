@@ -128,24 +128,6 @@ CREATE TABLE IF NOT EXISTS animal_new
     database_insert(query, 0)
 
 
-def drop_database():
-    query = """
-    DROP TABLE animal_new;
-    DROP TABLE animal_age;
-    DROP TABLE animal_breed;
-    DROP TABLE animal_color;
-    DROP TABLE animal_color_all_color;
-    DROP TABLE animal_name;
-    DROP TABLE animal_new_month_departure;
-    DROP TABLE animal_new_year_departure;
-    DROP TABLE animal_where_now;
-    DROP TABLE animal_program;
-    DROP TABLE animal_type;
-    DROP TABLE animal_date_of_birth;
-    """
-    database_insert(query, 0)
-
-
 def insert_no_main_tables():
     query = """
 INSERT INTO animal_age (age)
@@ -154,8 +136,14 @@ SELECT DISTINCT age_upon_outcome FROM animals;
 INSERT INTO animal_breed (breed)
 SELECT DISTINCT breed FROM animals;
 
+INSERT INTO animal_color_all_color (color)
+SELECT DISTINCT trim(color1) as color_result FROM animals
+UNION
+SELECT DISTINCT trim(color2) as color_result FROM animals;
+
 INSERT INTO animal_color (id_color_1, id_color_2)
-SELECT DISTINCT color1,color2 FROM animals;
+SELECT DISTINCT trim(color1), trim(color2)
+FROM animals;
 
 INSERT INTO animal_date_of_birth (date_of_birth)
 SELECT DISTINCT date_of_birth FROM animals;
@@ -181,6 +169,42 @@ SELECT DISTINCT outcome_type FROM animals;
     database_insert(query, 0)
 
 
+def insert_main_table():
+    query = """
+    SELECT age_upon_outcome, animal_type, name, breed, color1, color2,
+    date_of_birth, outcome_subtype, outcome_type, outcome_month, outcome_year 
+    FROM animals LIMIT 1"""
+    database_select(query, 0)
+
+
+def update_table():
+    query = """
+    UPDATE animal_color
+    SET id_color_1 = (SELECT id FROM animal_color_all_color WHERE id_color_1 = color),
+        id_color_2 = (SELECT id FROM animal_color_all_color WHERE id_color_2 = color);"""
+    database_insert(query, 0)
+
+
+def drop_database():
+    query = """
+    DROP TABLE animal_new;
+    DROP TABLE animal_age;
+    DROP TABLE animal_breed;
+    DROP TABLE animal_color;
+    DROP TABLE animal_color_all_color;
+    DROP TABLE animal_name;
+    DROP TABLE animal_new_month_departure;
+    DROP TABLE animal_new_year_departure;
+    DROP TABLE animal_where_now;
+    DROP TABLE animal_program;
+    DROP TABLE animal_type;
+    DROP TABLE animal_date_of_birth;
+    """
+    database_insert(query, 0)
+
+
 create_database()
 #drop_database()
 insert_no_main_tables()
+insert_main_table()
+update_table()
